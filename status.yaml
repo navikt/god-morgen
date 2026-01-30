@@ -14,6 +14,23 @@ U8PL7CR4K: # Kyrre
   friday:
     text: "Hjemmekontor"
     emoji: ":small_house_hidden_dino:"
+
+CNY1VFB6Z: # Kristen
+ monday:
+    text: "Hjemmekontor"
+    emoji: ":home-dolly:"
+  tuesday:
+    text: "Hjemmekontor"
+    emoji: ":home-dolly:"
+  wednesday:
+    text: "Fyrstikkalléen"
+    emoji: ":fyrstikkalle:"
+  thursday:
+    text: "Fyrstikkalléen"
+    emoji: ":fyrstikkalle:"
+  friday:
+    text: "Hjemmekontor"
+    emoji: ":home-dolly:"
     
 U0148GKNAJK: # Stian
   monday:
@@ -23,11 +40,11 @@ U0148GKNAJK: # Stian
     text: "Hjemmekontor"
     emoji: ":home-dolly:"
   wednesday:
-    text: "I Fyrstikkalléen, A2"
-    emoji: ":fya1:"
+    text: "Fyrstikkalléen"
+    emoji: ":fyrstikkalle:"
   thursday:
-    text: "I Fyrstikkalléen, A2"
-    emoji: ":fya1:"
+    text: "Fyrstikkalléen"
+    emoji: ":fyrstikkalle:"
   friday:
     text: "Hjemmekontor"
     emoji: ":home-dolly:"

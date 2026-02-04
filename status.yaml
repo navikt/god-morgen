@@ -87,7 +87,7 @@ U03JJ1XQYM6: # Eivind
 D03SMP8MHFF: # Kristian
   monday:
     text: "I Fyrstikkalléen, A4"
-    emoji: ":fyrstikkalle-lys:" 
+    emoji: ":fyrstikkalle-lys:"
   tuesday:
     text: "I Fyrstikkalléen, A4"
     emoji: ":fyrstikkalle-lys:"
@@ -110,10 +110,10 @@ U017URKMH0S: # Caroline
     emoji: ":fyrstikkalle-lys:"
   wednesday:
     text: "I Fyrstikkalléen, A5"
-    emoji: ":fyrstikkalle-lys:" 
+    emoji: ":fyrstikkalle-lys:"
   thursday:
     text: "I Fyrstikkalléen, A5"
-    emoji: ":fyrstikkalle-lys:" 
+    emoji: ":fyrstikkalle-lys:"
   friday:
     text: "Hjemmekontor"
     emoji: ":house_with_garden:"

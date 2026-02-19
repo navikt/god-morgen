@@ -1,4 +1,4 @@
-# Good Morning Status!
+# God morgen
 
 Hver morgen kjører det en jobb som setter statusen din i Slack.
 Perfekt hvis du har faste dager på kontoret, og ikke gidder å sette statusen selv.

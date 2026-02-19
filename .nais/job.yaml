@@ -1,0 +1,20 @@
+apiVersion: nais.io/v1
+kind: Naisjob
+metadata:
+  name: god-morgen-cron
+  namespace: the-g-team
+spec:
+  image: gcr.io/google-containers/curl:latest
+  schedule: "0 6 * * 1-5"
+  timeZone: "Europe/Oslo"
+  concurrencyPolicy: Forbid
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 300
+  command:
+    - /bin/sh
+    - -c
+    - "curl -s -X POST http://god-morgen/api/apply-statuses"
+  accessPolicy:
+    outbound:
+      rules:
+        - application: god-morgen

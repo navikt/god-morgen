@@ -1,0 +1,24 @@
+FROM ruby:3.4-slim AS builder
+
+WORKDIR /app
+
+COPY Gemfile Gemfile.lock ./
+RUN bundle install --without development test
+
+COPY config.ru slack_bot.rb ./
+COPY config/ config/
+COPY lib/ lib/
+
+# hadolint ignore=DL3006
+FROM gcr.io/distroless/base-debian12
+
+COPY --from=builder /usr/local /usr/local
+COPY --from=builder /app /app
+COPY --from=builder /lib /lib
+
+WORKDIR /app
+
+EXPOSE 4567
+
+ENTRYPOINT ["ruby", "-S"]
+CMD ["puma", "-C", "config/puma.rb"]

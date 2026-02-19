@@ -1,18 +1,16 @@
-name: Lint YAML
+name: Linting
+on: push
 
-on:
-  pull_request:
-    paths:
-      - 'status.yaml'
-      - '.yamllint'
+permissions:
+  contents: read
 
 jobs:
-  lint:
+  linting:
+    name: Run Rubocop
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
-
-      - name: YAML Lint
-        run: yamllint -c .yamllint status.yaml
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6
+      - uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd # ratchet:ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+      - run: bundle exec rubocop

@@ -22,5 +22,5 @@ WORKDIR /app
 
 EXPOSE 4567
 
-ENTRYPOINT ["ruby", "-S"]
+ENTRYPOINT ["bundle", "exec"]
 CMD ["puma", "-C", "config/puma.rb"]

@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 require 'net/http'
 require 'json'
@@ -6,7 +7,7 @@ require 'uri'
 require 'yaml'
 require 'date'
 
-token = ENV['SLACK_TOKEN']
+token = ENV.fetch('SLACK_TOKEN', nil)
 config_file = ARGV[0] || 'status.yaml'
 
 unless token

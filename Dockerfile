@@ -1,9 +1,11 @@
 FROM ruby:3.4-slim AS builder
 
 WORKDIR /app
+RUN gem install bundler
+RUN bundle config set without 'development test'
 
 COPY Gemfile Gemfile.lock ./
-RUN bundle install --without development test
+RUN bundle install
 
 COPY config.ru slack_bot.rb ./
 COPY config/ config/

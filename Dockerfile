@@ -1,4 +1,4 @@
-FROM ruby:3.4-slim AS builder
+FROM ruby:3.4 AS builder
 
 WORKDIR /app
 RUN gem install bundler

@@ -4,7 +4,7 @@ metadata:
   name: god-morgen-cron
   namespace: the-g-team
 spec:
-  image: gcr.io/google-containers/curl:latest
+  image: europe-north1-docker.pkg.dev/nais-io/nais/images/debug:latest
   schedule: "0 6 * * 1-5"
   timeZone: "Europe/Oslo"
   concurrencyPolicy: Forbid

@@ -1,9 +1,14 @@
 FROM ruby:3.4 AS builder
 
-WORKDIR /app
 RUN gem install bundler
-RUN bundle config set without 'development test'
 
+# throw errors if Gemfile has been modified since Gemfile.lock
+RUN bundle config --global frozen 1
+
+WORKDIR /app
+
+ENV BUNDLE_WITHOUT="development:test" \
+    BUNDLE_DEPLOYMENT="true"
 COPY Gemfile Gemfile.lock ./
 RUN bundle install
 
@@ -11,16 +16,4 @@ COPY config.ru slack_bot.rb ./
 COPY config/ config/
 COPY lib/ lib/
 
-# hadolint ignore=DL3006
-FROM gcr.io/distroless/base-debian12
-
-COPY --from=builder /usr/local /usr/local
-COPY --from=builder /app /app
-COPY --from=builder /lib /lib
-
-WORKDIR /app
-
-EXPOSE 4567
-
-ENTRYPOINT ["bundle", "exec"]
-CMD ["puma", "-C", "config/puma.rb"]
+ENTRYPOINT ["bundler", "exec", "puma", "-C", "config/puma.rb"]

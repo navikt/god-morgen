@@ -3,8 +3,11 @@
 require 'net/http'
 require 'json'
 require 'uri'
+require 'time'
 
 class SlackClient
+  TIMEZONE = 'Europe/Oslo'
+
   def initialize(token)
     @token = token
   end
@@ -20,7 +23,8 @@ class SlackClient
 
     profile = {
       status_text: text,
-      status_emoji: emoji
+      status_emoji: emoji,
+      status_expiration: midnight_tonight
     }
 
     request.body = { profile: profile, user: user_id }.to_json
@@ -49,5 +53,12 @@ class SlackClient
 
     response = http.request(request)
     JSON.parse(response.body)
+  end
+
+  private
+
+  def midnight_tonight
+    now = Time.now.getlocal('+01:00')
+    Time.new(now.year, now.month, now.day + 1, 0, 0, 0, '+01:00').to_i
   end
 end

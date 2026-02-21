@@ -59,22 +59,30 @@ def modal_view
     callback_id: 'schedule_modal',
     title: {
       type: 'plain_text',
-      text: 'Set Status Schedule'
+      text: 'Ukentlig status'
     },
     submit: {
       type: 'plain_text',
-      text: 'Submit'
+      text: 'Lagre'
     },
     close: {
       type: 'plain_text',
-      text: 'Cancel'
+      text: 'Avbryt'
     },
     blocks: [
-      *day_blocks('monday', 'Monday'),
-      *day_blocks('tuesday', 'Tuesday'),
-      *day_blocks('wednesday', 'Wednesday'),
-      *day_blocks('thursday', 'Thursday'),
-      *day_blocks('friday', 'Friday')
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: 'Sett opp din ukentlige statusplan. For hver dag, skriv en statusbeskrivelse og velg en emoji ved hjelp av emoji-velgeren 🎉'
+        }
+      },
+      { type: 'divider' },
+      *day_blocks('monday', 'Mandag'),
+      *day_blocks('tuesday', 'Tirsdag'),
+      *day_blocks('wednesday', 'Onsdag'),
+      *day_blocks('thursday', 'Torsdag'),
+      *day_blocks('friday', 'Fredag')
     ]
   }
 end
@@ -93,14 +101,14 @@ def day_blocks(day, label)
       block_id: "#{day}_text",
       label: {
         type: 'plain_text',
-        text: 'Status description'
+        text: 'Statusbeskrivelse'
       },
       element: {
         type: 'plain_text_input',
         action_id: "#{day}_text_input",
         placeholder: {
           type: 'plain_text',
-          text: 'e.g. Working from home'
+          text: 'f.eks. Hjemmekontor'
         }
       }
     },
@@ -109,7 +117,7 @@ def day_blocks(day, label)
       block_id: "#{day}_emoji",
       label: {
         type: 'plain_text',
-        text: 'Status emoji'
+        text: 'Statusemoji'
       },
       element: {
         type: 'rich_text_input',

@@ -74,7 +74,8 @@ def modal_view
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: 'Sett opp din ukentlige statusplan. For hver dag, skriv en statusbeskrivelse og velg en emoji ved hjelp av emoji-velgeren 🎉'
+          text: 'Sett opp din ukentlige statusplan. For hver dag, skriv en statusbeskrivelse og velg en emoji  ' \
+                'ved hjelp av emoji-velgeren 🎉'
         }
       },
       { type: 'divider' },

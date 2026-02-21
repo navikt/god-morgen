@@ -9,6 +9,7 @@ WORKDIR /app
 
 ENV BUNDLE_WITHOUT="development:test" \
     BUNDLE_DEPLOYMENT="true"
+
 COPY Gemfile Gemfile.lock ./
 RUN bundle install
 

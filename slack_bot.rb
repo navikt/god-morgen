@@ -112,12 +112,8 @@ def day_blocks(day, label)
         text: 'Status emoji'
       },
       element: {
-        type: 'plain_text_input',
-        action_id: "#{day}_emoji_input",
-        placeholder: {
-          type: 'plain_text',
-          text: 'e.g. :small_house_hidden_dino:'
-        }
+        type: 'rich_text_input',
+        action_id: "#{day}_emoji_input"
       }
     }
   ]
@@ -130,7 +126,7 @@ def handle_form_submission(payload)
   schedule = %w[monday tuesday wednesday thursday friday].each_with_object({}) do |day, hash|
     hash[day] = {
       'text' => values["#{day}_text"]["#{day}_text_input"]['value'],
-      'emoji' => values["#{day}_emoji"]["#{day}_emoji_input"]['value']
+      'emoji' => extract_emoji(values["#{day}_emoji"]["#{day}_emoji_input"])
     }
   end
 
@@ -138,6 +134,27 @@ def handle_form_submission(payload)
 
   content_type :json
   { response_action: 'clear' }.to_json
+end
+
+# Extract the first emoji from a rich_text_input value.
+# Payload structure: { "type" => "rich_text", "elements" => [
+#   { "type" => "rich_text_section", "elements" => [
+#     { "type" => "emoji", "name" => "house" }
+#   ]}
+# ]}
+def extract_emoji(rich_text)
+  return nil unless rich_text
+
+  elements = rich_text.dig('rich_text_value', 'elements') || []
+  elements.each do |section|
+    next unless section['elements']
+
+    section['elements'].each do |el|
+      return ":#{el['name']}:" if el['type'] == 'emoji'
+    end
+  end
+
+  nil
 end
 
 post '/api/apply-statuses' do

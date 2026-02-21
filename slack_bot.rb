@@ -8,10 +8,9 @@ require 'date'
 require_relative 'lib/valkey_client'
 require_relative 'lib/slack_client'
 
-valkey = ValkeyClient.new
-slack = SlackClient.new(ENV.fetch('SLACK_BOT_TOKEN', nil))
-
 set :port, 4567
+set :valkey, ValkeyClient.new
+set :slack, SlackClient.new(ENV.fetch('SLACK_BOT_TOKEN', nil))
 
 post '/slack/interactions' do
   payload = JSON.parse(params['payload'])
@@ -139,7 +138,7 @@ def handle_form_submission(payload)
     }
   end
 
-  valkey.save_schedule(user_id, schedule)
+  settings.valkey.save_schedule(user_id, schedule)
 
   content_type :json
   { response_action: 'clear' }.to_json
@@ -170,20 +169,20 @@ post '/api/apply-statuses' do
   content_type :json
 
   today = Date.today.strftime('%A').downcase
-  user_ids = valkey.all_user_ids
+  user_ids = settings.valkey.all_user_ids
   results = []
 
   user_ids.each do |user_id|
-    schedule = valkey.get_schedule(user_id)
+    schedule = settings.valkey.get_schedule(user_id)
     next unless schedule
 
     status_config = schedule[today]
     next unless status_config
 
-    result = slack.set_status(user_id, status_config['text'], status_config['emoji'])
+    result = settings.slack.set_status(user_id, status_config['text'], status_config['emoji'])
 
     if result['ok']
-      slack.send_dm(user_id, "God morgen! Status satt til #{status_config['emoji']} #{status_config['text']}")
+      settings.slack.send_dm(user_id, "God morgen! Status satt til #{status_config['emoji']} #{status_config['text']}")
       results << { user_id: user_id, status: 'ok' }
     else
       results << { user_id: user_id, status: 'error', error: result['error'] }

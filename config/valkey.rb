@@ -4,7 +4,7 @@ require 'redis'
 
 module ValkeyConfig
   def self.client
-    instance = 'GOD-MORGEN'
+    instance = 'GOD_MORGEN'
 
     @client ||= Redis.new(
       host: ENV["VALKEY_HOST_#{instance}"] || ENV['VALKEY_HOST'] || 'localhost',

@@ -7,10 +7,12 @@ require 'net/http'
 require 'date'
 require_relative 'lib/valkey_client'
 require_relative 'lib/slack_client'
+require_relative 'lib/json_logger'
 
 set :port, 4567
 set :valkey, ValkeyClient.new
 set :slack, SlackClient.new(ENV.fetch('SLACK_BOT_TOKEN', nil))
+set :logger, JsonLogger.new
 
 post '/slack/interactions' do
   payload = JSON.parse(params['payload'])
@@ -49,7 +51,7 @@ def open_modal(trigger_id)
 
   return if result['ok']
 
-  puts "Error opening modal: #{result['error']}"
+  settings.logger.error('open_modal_failed', error: result['error'])
 end
 
 def modal_view
@@ -170,6 +172,7 @@ post '/api/apply-statuses' do
 
   today = Date.today.strftime('%A').downcase
   user_ids = settings.valkey.all_user_ids
+  settings.logger.info('apply_statuses', user_count: user_ids.size)
   results = []
 
   user_ids.each do |user_id|
@@ -183,6 +186,7 @@ post '/api/apply-statuses' do
 
     if result['ok']
       settings.slack.send_dm(user_id, "God morgen! Status satt til #{status_config['emoji']} #{status_config['text']}")
+      settings.logger.info('user_notified', user_id: user_id, status_text: status_config['text'])
       results << { user_id: user_id, status: 'ok' }
     else
       results << { user_id: user_id, status: 'error', error: result['error'] }

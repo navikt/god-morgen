@@ -1,0 +1,20 @@
+apiVersion: aiven.io/v1alpha1
+kind: Valkey
+metadata:
+  finalizers:
+  - finalizers.aiven.io/delete-remote-resource
+  name: valkey-the-g-team-god-morgen
+  namespace: the-g-team
+spec:
+  cloudName: google-europe-north1
+  plan: hobbyist
+  powered: true
+  project: nav-prod
+  projectVpcId: fff21e17-95d5-408b-8df5-15aacf38f5dd
+  tags:
+    environment: prod
+    team: the-g-team
+    tenant: nav
+  terminationProtection: true
+  userConfig:
+    valkey_maxmemory_policy: allkeys-lru

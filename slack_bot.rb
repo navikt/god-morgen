@@ -187,7 +187,9 @@ post '/api/apply-statuses' do
     if result['ok']
       settings.logger.info('set_status_response', user_id: user_id)
 
-      dm_result = settings.slack.send_dm(user_id, "God morgen! Status satt til #{status_config['emoji']} #{status_config['text']}")
+      dm_result = settings.slack.send_dm(user_id,
+                                         'God morgen! Status satt til ' \
+                                         "#{status_config['emoji']} #{status_config['text']}")
       if dm_result['ok']
         settings.logger.info('send_dm_response', user_id: user_id)
         applied += 1

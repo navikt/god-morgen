@@ -11,7 +11,7 @@ require_relative 'lib/json_logger'
 
 set :port, 4567
 set :valkey, ValkeyClient.new
-set :slack, SlackClient.new(ENV.fetch('SLACK_USER_TOKEN', 'SLACK_BOT_TOKEN', nil))
+set :slack, SlackClient.new(ENV.fetch('SLACK_USER_TOKEN', nil), ENV.fetch('SLACK_BOT_TOKEN', nil))
 set :logger, JsonLogger.new
 
 post '/slack/interactions' do

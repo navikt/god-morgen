@@ -194,11 +194,11 @@ post '/api/apply-statuses' do
         settings.logger.info('send_dm_response', user_id: user_id)
         applied += 1
       else
-        settings.logger.error('send_dm_response', user_id: user_id, error: dm_result['error'])
+        settings.logger.error('send_dm_response', user_id: user_id, error: dm_result['error'], payload: dm_result)
       end
     else
 
-      settings.logger.error('set_status_response', user_id: user_id, error: result['error'])
+      settings.logger.error('set_status_response', user_id: user_id, error: result['error'], payload: dm_result)
     end
   end
 

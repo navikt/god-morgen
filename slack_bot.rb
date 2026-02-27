@@ -25,14 +25,16 @@ end
 
 post '/slack/commands' do
   trigger_id = params['trigger_id']
+  user_id = params['user_id']
 
-  open_modal(trigger_id)
+  schedule = settings.valkey.get_schedule(user_id)
+  open_modal(trigger_id, schedule)
 
   status 200
   body ''
 end
 
-def open_modal(trigger_id)
+def open_modal(trigger_id, schedule = nil)
   uri = URI('https://slack.com/api/views.open')
   http = Net::HTTP.new(uri.host, uri.port)
   http.use_ssl = true
@@ -43,7 +45,7 @@ def open_modal(trigger_id)
 
   request.body = {
     trigger_id: trigger_id,
-    view: modal_view
+    view: modal_view(schedule)
   }.to_json
 
   response = http.request(request)
@@ -54,7 +56,7 @@ def open_modal(trigger_id)
   settings.logger.error('open_modal_failed', error: result['error'])
 end
 
-def modal_view
+def modal_view(schedule = nil)
   {
     type: 'modal',
     callback_id: 'schedule_modal',
@@ -80,16 +82,49 @@ def modal_view
         }
       },
       { type: 'divider' },
-      *day_blocks('monday', 'Mandag'),
-      *day_blocks('tuesday', 'Tirsdag'),
-      *day_blocks('wednesday', 'Onsdag'),
-      *day_blocks('thursday', 'Torsdag'),
-      *day_blocks('friday', 'Fredag')
+      *day_blocks('monday', 'Mandag', schedule),
+      *day_blocks('tuesday', 'Tirsdag', schedule),
+      *day_blocks('wednesday', 'Onsdag', schedule),
+      *day_blocks('thursday', 'Torsdag', schedule),
+      *day_blocks('friday', 'Fredag', schedule)
     ]
   }
 end
 
-def day_blocks(day, label)
+def day_blocks(day, label, schedule = nil)
+  day_data = schedule&.dig(day)
+  text_value = day_data&.dig('text')
+  emoji_value = day_data&.dig('emoji')
+
+  text_element = {
+    type: 'plain_text_input',
+    action_id: "#{day}_text_input",
+    placeholder: {
+      type: 'plain_text',
+      text: 'f.eks. Hjemmekontor'
+    }
+  }
+  text_element[:initial_value] = text_value if text_value
+
+  emoji_element = {
+    type: 'rich_text_input',
+    action_id: "#{day}_emoji_input"
+  }
+  if emoji_value
+    emoji_name = emoji_value.delete(':')
+    emoji_element[:initial_value] = {
+      type: 'rich_text',
+      elements: [
+        {
+          type: 'rich_text_section',
+          elements: [
+            { type: 'emoji', name: emoji_name }
+          ]
+        }
+      ]
+    }
+  end
+
   [
     {
       type: 'header',
@@ -105,14 +140,7 @@ def day_blocks(day, label)
         type: 'plain_text',
         text: 'Statusbeskrivelse'
       },
-      element: {
-        type: 'plain_text_input',
-        action_id: "#{day}_text_input",
-        placeholder: {
-          type: 'plain_text',
-          text: 'f.eks. Hjemmekontor'
-        }
-      }
+      element: text_element
     },
     {
       type: 'input',
@@ -121,10 +149,7 @@ def day_blocks(day, label)
         type: 'plain_text',
         text: 'Statusemoji'
       },
-      element: {
-        type: 'rich_text_input',
-        action_id: "#{day}_emoji_input"
-      }
+      element: emoji_element
     }
   ]
 end

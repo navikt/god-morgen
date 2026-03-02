@@ -16,23 +16,6 @@ CNY1VFB6Z: # Kristen
     text: "Hjemmekontor"
     emoji: ":home-dolly:"
 
-U0148GKNAJK: # Stian
-  monday:
-    text: "Hjemmekontor"
-    emoji: ":home-dolly:"
-  tuesday:
-    text: "Hjemmekontor"
-    emoji: ":home-dolly:"
-  wednesday:
-    text: "Fyrstikkalléen"
-    emoji: ":fyrstikkalle:"
-  thursday:
-    text: "Fyrstikkalléen"
-    emoji: ":fyrstikkalle:"
-  friday:
-    text: "Hjemmekontor"
-    emoji: ":home-dolly:"
-
 U0A23HA27FZ: # Inger
   monday:
     text: "Hjemmekontor"

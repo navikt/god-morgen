@@ -20,12 +20,21 @@ post '/slack/interactions' do
   case payload['type']
   when 'view_submission'
     handle_form_submission(payload)
+  when 'block_actions'
+    handle_block_actions(payload)
   end
 end
 
 post '/slack/commands' do
   trigger_id = params['trigger_id']
   user_id = params['user_id']
+  text = (params['text'] || '').strip
+
+  if text == 'unsubscribe'
+    settings.valkey.delete_schedule(user_id)
+    content_type :json
+    return { response_type: 'ephemeral', text: 'Du er nå avmeldt fra en god morgen.' }.to_json
+  end
 
   schedule = settings.valkey.get_schedule(user_id)
   open_modal(trigger_id, schedule)
@@ -86,7 +95,25 @@ def modal_view(schedule = nil)
       *day_blocks('tuesday', 'Tirsdag', schedule),
       *day_blocks('wednesday', 'Onsdag', schedule),
       *day_blocks('thursday', 'Torsdag', schedule),
-      *day_blocks('friday', 'Fredag', schedule)
+      *day_blocks('friday', 'Fredag', schedule),
+      { type: 'divider' },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: '*Vil du slutte?* Hvis du ikke lenger ønsker å motta daglige statuser kan du avmelde deg.'
+        },
+        accessory: {
+          type: 'button',
+          text: {
+            type: 'plain_text',
+            text: 'Avmeld',
+            emoji: true
+          },
+          style: 'danger',
+          action_id: 'unsubscribe_button'
+        }
+      }
     ]
   }
 end
@@ -190,6 +217,29 @@ def extract_emoji(rich_text)
   end
 
   nil
+end
+
+def handle_block_actions(payload)
+  user_id = payload['user'] && payload['user']['id']
+  action = payload['actions']&.first
+  return unless user_id && action
+  return unless action['action_id'] == 'unsubscribe_button'
+
+  process_unsubscribe(user_id)
+
+  content_type :json
+  body ''
+end
+
+def process_unsubscribe(user_id)
+  settings.valkey.delete_schedule(user_id)
+  settings.logger.info('user_unsubscribed', user_id: user_id)
+  dm_result = settings.slack.send_dm(user_id, 'Du er nå avmeldt fra en god morgen.')
+  if dm_result && dm_result['ok']
+    settings.logger.info('user_unsubscribed_dm_sent', user_id: user_id)
+  else
+    settings.logger.error('user_unsubscribed_dm_failed', user_id: user_id, error: dm_result && dm_result['error'], payload: dm_result)
+  end
 end
 
 post '/api/apply-statuses' do

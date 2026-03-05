@@ -14,6 +14,8 @@ set :valkey, ValkeyClient.new
 set :slack, SlackClient.new(ENV.fetch('SLACK_USER_TOKEN', nil), ENV.fetch('SLACK_BOT_TOKEN', nil))
 set :logger, JsonLogger.new
 
+migrate(settings.valkey, settings.slack)
+
 post '/slack/interactions' do
   payload = JSON.parse(params['payload'])
 

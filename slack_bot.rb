@@ -238,7 +238,8 @@ def process_unsubscribe(user_id)
   if dm_result && dm_result['ok']
     settings.logger.info('user_unsubscribed_dm_sent', user_id: user_id)
   else
-    settings.logger.error('user_unsubscribed_dm_failed', user_id: user_id, error: dm_result && dm_result['error'], payload: dm_result)
+    settings.logger.error('user_unsubscribed_dm_failed', user_id: user_id, error: dm_result && dm_result['error'],
+                                                         payload: dm_result)
   end
 end
 

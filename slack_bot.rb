@@ -243,6 +243,48 @@ def process_unsubscribe(user_id)
   end
 end
 
+get '/internal/' do
+  content_type :html
+
+  users = settings.valkey.all_user_ids
+
+  rows = users.map do |user_id|
+    schedule = settings.valkey.get_schedule(user_id)
+    schedule_html = schedule ? "<pre>#{JSON.pretty_generate(schedule)}</pre>" : '&mdash;'
+    "<tr><td>#{user_id}</td><td>#{schedule_html}</td></tr>"
+  end.join("\n")
+
+  html = <<~HTML
+      <!DOCTYPE html>
+      <html lang="no">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <title>God morgen - Intern</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; padding: 20px; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #ccc; padding: 6px; text-align: left; vertical-align: top; }
+            pre { margin: 0; white-space: pre-wrap; word-wrap: break-word; }
+          </style>
+        </head>
+        <body>
+          <h1>God morgen — Intern</h1>
+          <table>
+            <thead>
+              <tr><th>Bruker</th><th>Plan</th></tr>
+            </thead>
+            <tbody>
+    #{rows}
+            </tbody>
+          </table>
+        </body>
+      </html>
+  HTML
+
+  html
+end
+
 post '/api/apply-statuses' do
   content_type :json
 

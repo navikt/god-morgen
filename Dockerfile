@@ -1,20 +1,17 @@
-FROM ruby:3.4 AS builder
-
-RUN gem install bundler
-
-# throw errors if Gemfile has been modified since Gemfile.lock
-RUN bundle config --global frozen 1
+FROM golang:1.26 AS builder
 
 WORKDIR /app
 
-ENV BUNDLE_WITHOUT="development:test" \
-    BUNDLE_DEPLOYMENT="true"
+COPY go.mod go.sum ./
+RUN go mod download
 
-COPY Gemfile Gemfile.lock ./
-RUN bundle install
+COPY main.go server.go ./
+COPY internal/ internal/
+RUN CGO_ENABLED=0 GOOS=linux go build -o god-morgen .
 
-COPY config.ru slack_bot.rb ./
-COPY config/ config/
-COPY lib/ lib/
+FROM gcr.io/distroless/static-debian12
 
-ENTRYPOINT ["bundler", "exec", "puma", "-C", "config/puma.rb"]
+WORKDIR /app
+COPY --from=builder /app/god-morgen .
+
+ENTRYPOINT ["/app/god-morgen"]

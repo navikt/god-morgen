@@ -4,7 +4,6 @@ metadata:
   name: god-morgen
   namespace: the-g-team
 spec:
-  port: 4567
   replicas:
     min: 1
     max: 2

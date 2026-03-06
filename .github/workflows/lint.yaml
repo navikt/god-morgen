@@ -6,11 +6,9 @@ permissions:
 
 jobs:
   linting:
-    name: Run Rubocop
+    name: Run checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6
-      - uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd # ratchet:ruby/setup-ruby@v1
-        with:
-          bundler-cache: true
-      - run: bundle exec rubocop
+      - uses: jdx/mise-action@d06fd9b3c0f44bc2878df5e4b3b8a2e8dbd2fe16 # ratchet:jdx/mise-action@v2
+      - run: mise run check

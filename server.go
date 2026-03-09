@@ -383,7 +383,7 @@ func modalView(userData valkey.UserData) map[string]any {
 							},
 						}
 					}
-					return nil
+					return []any{}
 				}(),
 			},
 		},

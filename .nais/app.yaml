@@ -27,3 +27,4 @@ spec:
     - secret: god-morgen
   ingresses:
     - https://godmorgen.nav.no
+    - https://godmorgen.intern.nav.no

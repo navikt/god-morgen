@@ -24,7 +24,7 @@ type server struct {
 func newServer(log *slog.Logger) *server {
 	return &server{
 		valkey: valkey.New(),
-		slack:  slack.New(os.Getenv("SLACK_USER_TOKEN"), os.Getenv("SLACK_BOT_TOKEN")),
+		slack:  slack.New(log, os.Getenv("SLACK_USER_TOKEN"), os.Getenv("SLACK_BOT_TOKEN")),
 		log:    log,
 	}
 }
@@ -91,7 +91,7 @@ func (s *server) handleCommands(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.log.Error("open_modal_failed", "error", err)
 	} else if ok, _ := result["ok"].(bool); !ok {
-		s.log.Error("open_modal_failed", "error", result["error"])
+		s.log.Error("open_modal_failed", "error", result["error"], "payload", result)
 	}
 
 	w.WriteHeader(http.StatusOK)

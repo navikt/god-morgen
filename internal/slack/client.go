@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"time"
 )
@@ -15,13 +16,15 @@ type Client struct {
 	userToken string
 	botToken  string
 	http      *http.Client
+	log       *slog.Logger
 }
 
-func New(userToken, botToken string) *Client {
+func New(log *slog.Logger, userToken, botToken string) *Client {
 	return &Client{
 		userToken: userToken,
 		botToken:  botToken,
 		http:      &http.Client{Timeout: 10 * time.Second},
+		log:       log,
 	}
 }
 
@@ -54,6 +57,7 @@ func (c *Client) OpenModal(triggerID string, view map[string]any) (map[string]an
 		"trigger_id": triggerID,
 		"view":       view,
 	})
+	c.log.Info("Debug", "payload", string(body))
 	return c.post("https://slack.com/api/views.open", c.botToken, body)
 }
 

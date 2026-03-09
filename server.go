@@ -198,7 +198,11 @@ func (s *server) handleInternal(w http.ResponseWriter, r *http.Request) {
 		} else {
 			scheduleHTML = "&mdash;"
 		}
-		fmt.Fprintf(&rows, "<tr><td>%s</td><td>%s</td></tr>\n", html.EscapeString(userID), scheduleHTML)
+		disableDM := "Ja"
+		if userData.Prefs.DisableDM {
+			disableDM = "Nei"
+		}
+		fmt.Fprintf(&rows, "<tr><td>%s</td><td>%s</td><td>%s</td></tr>\n", html.EscapeString(userID), scheduleHTML, disableDM)
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -218,7 +222,7 @@ func (s *server) handleInternal(w http.ResponseWriter, r *http.Request) {
   <body>
     <h1>God morgen — Intern</h1>
     <table>
-      <thead><tr><th>Bruker</th><th>Plan</th></tr></thead>
+      <thead><tr><th>Bruker</th><th>Plan</th><th>DM</th></tr></thead>
       <tbody>
 %s      </tbody>
     </table>

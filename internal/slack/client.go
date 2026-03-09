@@ -57,7 +57,6 @@ func (c *Client) OpenModal(triggerID string, view map[string]any) (map[string]an
 		"trigger_id": triggerID,
 		"view":       view,
 	})
-	c.log.Info("Debug", "payload", string(body))
 	return c.post("https://slack.com/api/views.open", c.botToken, body)
 }
 

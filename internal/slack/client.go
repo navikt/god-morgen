@@ -33,12 +33,12 @@ func (c *Client) GetProfile(userID string) (map[string]any, error) {
 	return c.get(url, c.userToken)
 }
 
-func (c *Client) SetStatus(userID, text, emoji string) (map[string]any, error) {
+func (c *Client) SetStatus(userID, text, emoji string, expireAt int64) (map[string]any, error) {
 	body, _ := json.Marshal(map[string]any{
 		"profile": map[string]any{
 			"status_text":       text,
 			"status_emoji":      emoji,
-			"status_expiration": endOfToday(),
+			"status_expiration": expireAt,
 		},
 		"user": userID,
 	})
@@ -103,12 +103,11 @@ func (c *Client) do(req *http.Request) (map[string]any, error) {
 	return result, nil
 }
 
-func endOfToday() int64 {
+func EndOfDay(t time.Time) int64 {
 	loc, err := time.LoadLocation(timezone)
 	if err != nil {
 		loc = time.FixedZone("CET", 3600)
 	}
-	now := time.Now().In(loc)
-	end := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 0, 0, loc)
-	return end.Unix()
+	d := t.In(loc)
+	return time.Date(d.Year(), d.Month(), d.Day(), 23, 59, 0, 0, loc).Unix()
 }

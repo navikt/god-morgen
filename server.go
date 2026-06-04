@@ -232,7 +232,8 @@ func (s *server) handleInternal(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) handleApplyStatuses(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	today := strings.ToLower(time.Now().Weekday().String())
+	now := time.Now()
+	today := strings.ToLower(now.Weekday().String())
 
 	userIDs, err := s.valkey.AllUserIDs(ctx)
 	if err != nil {
@@ -263,15 +264,25 @@ func (s *server) handleApplyStatuses(w http.ResponseWriter, r *http.Request) {
 		if ok, _ := profile["ok"].(bool); ok {
 			if p, ok := profile["profile"].(map[string]any); ok {
 				statusText, _ := p["status_text"].(string)
+				statusEmoji, _ := p["status_emoji"].(string)
 				exp, _ := p["status_expiration"].(float64)
-				if statusText != "" && exp > 0 && time.Unix(int64(exp), 0).After(time.Now()) {
-					s.log.Info("status_already_set", "user_id", userID, "status_expiration", int64(exp))
-					continue
+				// Skip only when the active status is a genuine external/vacation
+				// override — i.e., it differs from today's scheduled status and
+				// has a future expiration. If the active status matches the
+				// schedule, we re-apply so the expiration is extended correctly.
+				if statusText != dayConfig.Text || statusEmoji != dayConfig.Emoji {
+					if statusText != "" && exp > 0 && time.Unix(int64(exp), 0).After(now) {
+						s.log.Info("status_already_set", "user_id", userID, "status_expiration", int64(exp))
+						continue
+					}
 				}
 			}
 		}
 
-		result, err := s.slack.SetStatus(userID, dayConfig.Text, dayConfig.Emoji)
+		endDate := statusEndDate(userData.Schedule, today, now)
+		expireAt := slack.EndOfDay(endDate)
+
+		result, err := s.slack.SetStatus(userID, dayConfig.Text, dayConfig.Emoji, expireAt)
 		if err != nil {
 			s.log.Error("set_status_failed", "user_id", userID, "error", err)
 			continue
@@ -306,6 +317,43 @@ func (s *server) handleApplyStatuses(w http.ResponseWriter, r *http.Request) {
 		"applied": applied,
 		"users":   len(userIDs),
 	})
+}
+
+// orderedWeekdays defines the Mon–Fri sequence used for consecutive-status detection.
+var orderedWeekdays = []string{"monday", "tuesday", "wednesday", "thursday", "friday"}
+
+// statusEndDate returns the last calendar date on which the user's scheduled
+// status matches today's status (text + emoji) in an unbroken consecutive run.
+// The run never crosses a weekend: Friday is always the last possible end date.
+func statusEndDate(schedule map[string]valkey.DaySchedule, todayName string, todayDate time.Time) time.Time {
+	todayIdx := -1
+	for i, d := range orderedWeekdays {
+		if d == todayName {
+			todayIdx = i
+			break
+		}
+	}
+	if todayIdx < 0 {
+		return todayDate
+	}
+
+	ref := schedule[todayName]
+	last := todayDate
+
+	calDate := todayDate
+	for step := 1; step < len(orderedWeekdays)-todayIdx; step++ {
+		nextIdx := todayIdx + step
+		nextDay := orderedWeekdays[nextIdx]
+		calDate = calDate.AddDate(0, 0, 1)
+
+		next, ok := schedule[nextDay]
+		if !ok || next.Text != ref.Text || next.Emoji != ref.Emoji {
+			break
+		}
+		last = calDate
+	}
+
+	return last
 }
 
 func extractEmoji(richText map[string]any) string {

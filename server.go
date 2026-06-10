@@ -1,13 +1,19 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"html"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -16,26 +22,67 @@ import (
 )
 
 type server struct {
-	valkey *valkey.Client
-	slack  *slack.Client
-	log    *slog.Logger
+	valkey        *valkey.Client
+	slack         *slack.Client
+	signingSecret string
+	log           *slog.Logger
 }
 
 func newServer(log *slog.Logger) *server {
 	return &server{
-		valkey: valkey.New(),
-		slack:  slack.New(log, os.Getenv("SLACK_USER_TOKEN"), os.Getenv("SLACK_BOT_TOKEN")),
-		log:    log,
+		valkey:        valkey.New(),
+		slack:         slack.New(log, os.Getenv("SLACK_USER_TOKEN"), os.Getenv("SLACK_BOT_TOKEN")),
+		signingSecret: os.Getenv("SLACK_SIGNING_SECRET"),
+		log:           log,
 	}
 }
 
 func (s *server) routes() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("POST /slack/interactions", s.handleInteractions)
-	mux.HandleFunc("POST /slack/commands", s.handleCommands)
+	mux.Handle("POST /slack/interactions", s.verifySlackSignature(http.HandlerFunc(s.handleInteractions)))
+	mux.Handle("POST /slack/commands", s.verifySlackSignature(http.HandlerFunc(s.handleCommands)))
 	mux.HandleFunc("GET /internal/", s.handleInternal)
 	mux.HandleFunc("POST /api/apply-statuses", s.handleApplyStatuses)
 	return mux
+}
+
+// verifySlackSignature validates the X-Slack-Signature header using the
+// signing secret. It rejects requests with a timestamp older than 5 minutes
+// to prevent replay attacks.
+func (s *server) verifySlackSignature(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tsHeader := r.Header.Get("X-Slack-Request-Timestamp")
+		sigHeader := r.Header.Get("X-Slack-Signature")
+		if tsHeader == "" || sigHeader == "" {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		ts, err := strconv.ParseInt(tsHeader, 10, 64)
+		if err != nil || time.Now().Unix()-ts > 5*60 {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+		r.Body = io.NopCloser(bytes.NewReader(body))
+
+		base := "v0:" + tsHeader + ":" + string(body)
+		mac := hmac.New(sha256.New, []byte(s.signingSecret))
+		mac.Write([]byte(base))
+		expected := "v0=" + hex.EncodeToString(mac.Sum(nil))
+
+		if !hmac.Equal([]byte(expected), []byte(sigHeader)) {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 func (s *server) handleInteractions(w http.ResponseWriter, r *http.Request) {

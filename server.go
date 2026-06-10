@@ -41,8 +41,8 @@ func (s *server) routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("POST /slack/interactions", s.verifySlackSignature(http.HandlerFunc(s.handleInteractions)))
 	mux.Handle("POST /slack/commands", s.verifySlackSignature(http.HandlerFunc(s.handleCommands)))
-	mux.HandleFunc("GET /internal/", s.handleInternal)
-	mux.HandleFunc("POST /api/apply-statuses", s.handleApplyStatuses)
+	mux.HandleFunc("GET /internal", s.handleInternal)
+	mux.HandleFunc("POST /internal/api/apply-statuses", s.handleApplyStatuses)
 	return mux
 }
 

@@ -13,7 +13,7 @@ spec:
   command:
     - /bin/sh
     - -c
-    - "curl -s -X POST http://god-morgen/api/apply-statuses"
+    - "curl -s -X POST http://god-morgen/internal/api/apply-statuses"
   accessPolicy:
     outbound:
       rules:

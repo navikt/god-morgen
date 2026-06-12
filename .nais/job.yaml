@@ -1,7 +1,7 @@
 apiVersion: nais.io/v1
 kind: Naisjob
 metadata:
-  name: god-morgen-cron
+  name: god-morgen
   namespace: the-g-team
 spec:
   image: europe-north1-docker.pkg.dev/nais-io/nais/images/debug:latest

@@ -46,7 +46,7 @@ jobs:
 
   deploy-app:
     name: Deploy app
-    needs: [build, valkey]
+    needs: [build, deploy-valkey]
     runs-on: ubuntu-latest
     permissions:
       contents: read

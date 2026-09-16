@@ -30,23 +30,9 @@ jobs:
         with:
           team: the-g-team
 
-  deploy-valkey:
-    name: Deploy Valkey
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
-      - name: Deploy app
-        uses: nais/deploy/actions/deploy@027a91857992525139798892f2804b0ca21f4af6 # ratchet:nais/deploy/actions/deploy@v2
-        env:
-          CLUSTER: prod-gcp
-          RESOURCE: .nais/valkey.yaml
-
   deploy-app:
     name: Deploy app
-    needs: [build, deploy-valkey]
+    needs: [build]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -57,7 +43,7 @@ jobs:
         uses: nais/deploy/actions/deploy@027a91857992525139798892f2804b0ca21f4af6 # ratchet:nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
-          RESOURCE: .nais/app.yaml,.nais/valkey.yaml
+          RESOURCE: .nais/app.yaml
           WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}
 
   deploy-job:

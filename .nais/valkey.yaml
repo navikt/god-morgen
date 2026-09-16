@@ -1,9 +1,0 @@
-apiVersion: nais.io/v1
-kind: Valkey
-metadata:
-  name: god-morgen
-  namespace: the-g-team
-spec:
-  maxMemoryPolicy: allkeys-lru
-  tier: SingleNode
-  memory: 1GB

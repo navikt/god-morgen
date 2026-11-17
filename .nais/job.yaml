@@ -4,16 +4,17 @@ metadata:
   name: god-morgen-cron
   namespace: the-g-team
 spec:
-  image: europe-north1-docker.pkg.dev/nais-io/nais/images/debug:latest
   schedule: "0 6 * * 1-5"
   timeZone: "Europe/Oslo"
   concurrencyPolicy: Forbid
   backoffLimit: 1
   ttlSecondsAfterFinished: 300
   command:
-    - /bin/sh
-    - -c
-    - "curl -s -X POST http://god-morgen/internal/api/apply-statuses"
+    - /usr/bin/curl
+    - -fsS
+    - -X
+    - POST
+    - http://god-morgen/internal/api/apply-statuses
   accessPolicy:
     outbound:
       rules:

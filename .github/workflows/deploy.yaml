@@ -14,6 +14,7 @@ jobs:
       actions: read
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
+      image-cron: ${{ steps.docker-build-push-cron.outputs.image }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
         with:
@@ -29,6 +30,14 @@ jobs:
         id: docker-build-push
         with:
           team: the-g-team
+      - name: Build and push cron image and SBOM to OCI registry
+        if: steps.changed-files.outputs.changed != 'only-inputs'
+        uses: nais/docker-build-push@588f76a6f45aeb1e75d5e8417ec6ef6d79b2b39f # ratchet:nais/docker-build-push@v0
+        id: docker-build-push-cron
+        with:
+          team: the-g-team
+          dockerfile: Dockerfile.cron
+          image_suffix: cron
 
   deploy-app:
     name: Deploy app
@@ -60,3 +69,4 @@ jobs:
         env:
           CLUSTER: prod-gcp
           RESOURCE: .nais/job.yaml
+          WORKLOAD_IMAGE: ${{ needs.build.outputs.image-cron }}

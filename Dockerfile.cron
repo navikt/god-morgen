@@ -1,1 +1,1 @@
-FROM cgr.dev/chainguard/curl:latest@sha256:d52d56de418be648d64fbe8c284a5ce820147eb236f2c07f53c33ce244ed8343
+FROM cgr.dev/chainguard/curl:latest@sha256:c356bd8adc4971e0ad59cea19534248bbd1ac08ae4ffa075e5d6e855f5633f79
